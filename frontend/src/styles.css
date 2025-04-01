@@ -1,13 +1,18 @@
 body {
     background:
-    linear-gradient(
-      rgba(0, 0, 0, 0.3), 
-      rgba(0, 0, 0, 0.3)
-    ),
-    url("../public/bg.jpg"); 
+        linear-gradient(
+            rgba(0, 0, 0, 0.3),
+            rgba(0, 0, 0, 0.3)
+        ),
+        url("../public/bg.jpg"); /* Ensure the image is inside `public/` folder */
     background-repeat: no-repeat;
     background-attachment: fixed;
-    background-size: cover;
+    background-position: center;
+    background-size: cover; /* ✅ This will fill the entire screen */
+    min-height: 100vh; /* ✅ Ensures background takes full viewport height */
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 * {
