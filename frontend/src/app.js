@@ -1,8 +1,9 @@
 import React from 'react';
-import { AppBar, Typography, Toolbar, Box } from '@mui/material';
+import { Box } from '@mui/material';
 import VideoPlayer from './Components/VideoPlayer';
 import Options from './Components/Options';
 import Notifications from './Components/Notifications';
+import { motion } from 'framer-motion';
 
 const App = () => {
   return (
@@ -12,43 +13,42 @@ const App = () => {
         flexDirection: 'column',
         alignItems: 'center',
         width: '100%',
+        position: 'relative',
       }}
     >
-      <AppBar
-        position="static"
-        color="default"
-        elevation={4}
+      {/* 🔷 Logo on top-left corner */}
+      <Box
         sx={{
-          borderRadius: '12px',
-          mt: 4,
-          mb: 3,
-          px: 4,
-          py: 2,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          width: 'fit-content',
+          position: 'absolute',
+          top: 5,
+          left: 20,
+          zIndex: 10,
         }}
       >
-        <Toolbar disableGutters>
-          <Typography
-            variant="h4"
-            align="center"
-            sx={{
-              fontWeight: 'bold',
-              color: 'black',
-            }}
-          >
-            Welcome to the ConnectCam
-          </Typography>
-        </Toolbar>
-      </AppBar>
+        <img
+          src="/Logo.png"
+          alt="ConnectCam Logo"
+          style={{
+            width: '200px',
+            height: 'auto',
+            objectFit: 'contain',
+          }}
+        />
+      </Box>
+      <Options />
 
-      <VideoPlayer />
+      {/* 🎥 Video Player with zoom-in animation */}
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+      >
+        <VideoPlayer />
+      </motion.div>
 
-      <Options>
-        <Notifications />
-      </Options>
+      {/* 📞 Options and Notification */}
+      
+      <Notifications />
     </Box>
   );
 };

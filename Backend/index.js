@@ -1,7 +1,12 @@
+require("dotenv").config(); // Load .env
 const express = require("express");
 const app = express();
 const server = require("http").createServer(app);
 const cors = require("cors");
+const authRoutes = require('./routes/auth')
+const connectDB = require("./db");
+connectDB(); // Connect to MongoDB
+
 
 const io = require("socket.io")(server, {
     cors: {
@@ -11,6 +16,9 @@ const io = require("socket.io")(server, {
 });
 
 app.use(cors());
+
+app.use(express.json()); // Required to parse JSON body
+app.use("/api", authRoutes); // Use routes with /api prefix
 
 const PORT = process.env.PORT || 5000;
 

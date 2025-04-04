@@ -1,21 +1,21 @@
 body {
-    background:
-        linear-gradient(
-            rgba(0, 0, 0, 0.3),
-            rgba(0, 0, 0, 0.3)
-        ),
-        url("../public/bg.jpg"); /* Ensure the image is inside `public/` folder */
+    background: 
+        linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+        url("../public/bg.jpg");
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-position: center;
-    background-size: cover; /* ✅ This will fill the entire screen */
-    min-height: 100vh; /* ✅ Ensures background takes full viewport height */
+    background-size: cover;
+    min-height: 100vh;
     width: 100%;
     margin: 0;
     padding: 0;
+    color: white; /* Makes default text color white */
+    font-family: 'Roboto', sans-serif;
 }
 
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
