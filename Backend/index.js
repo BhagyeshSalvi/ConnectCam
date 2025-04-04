@@ -20,11 +20,17 @@ app.get("/", (req, res) => {
 
 io.on("connection", (socket) => {
 
+    console.log("Client connected:", socket.id);
+
     /**
      *   Emits the socket ID to the connected client
      * - When a user connects, they receive their unique socket ID.
      */
-    socket.emit("me", socket.id);
+    setTimeout(() => {
+        socket.emit("me", socket.id);
+        console.log("📤 Emitted 'me' with ID after delay:", socket.id);
+    }, 100); // 100ms delay
+
 
     /**
      *   Handles user disconnection
