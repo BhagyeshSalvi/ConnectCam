@@ -19,13 +19,7 @@
 
 
         useEffect(() => {
-            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-            .then((currentStream) => {
-                setStream(currentStream);
-                if (myVideo.current) {
-                myVideo.current.srcObject = currentStream;
-                }
-            });
+            
         
             // ✅ This ensures we receive "me" every time socket reconnects
             socket.on('me', (id) => {
@@ -47,12 +41,7 @@
             };
         }, []);
 
-        //Wait until the stream is ready, and the component (and its ref) is mounted, then assign srcObject
-        useEffect(() => {
-            if (myVideo.current && stream) {
-            myVideo.current.srcObject = stream;
-            }
-        }, [stream]);
+      
 
         const answerCall = () => {
             setCallAccepted(true);
@@ -117,7 +106,7 @@
 
         return (
             //pass the state and methods to the children
-            <SocketContext.Provider value={{ call, callAccepted, callEnded, me, name, setName, stream, myVideo, userVideo, callUser, answerCall, endCall }}>
+            <SocketContext.Provider value={{ call, callAccepted, callEnded, me, name, setName, stream, myVideo, userVideo, callUser, answerCall, endCall,setStream }}>
                 {children}
             </SocketContext.Provider>
         )

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Typography, Paper } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { motion } from 'framer-motion';
@@ -29,6 +29,13 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 
 const VideoPlayer = () => {
   const { name, callAccepted, myVideo, userVideo, callEnded, stream, call } = useContext(SocketContext);
+
+    //Wait until the stream is ready, and the component (and its ref) is mounted, then assign srcObject
+    useEffect(() => {
+      if (myVideo.current && stream) {
+      myVideo.current.srcObject = stream;
+      }
+  }, [stream,myVideo]);
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>

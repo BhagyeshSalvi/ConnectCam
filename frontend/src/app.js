@@ -1,11 +1,36 @@
-import React from 'react';
-import { Box } from '@mui/material';
+import React ,{useEffect,useContext}from 'react';
+import { Box, Button } from '@mui/material';
 import VideoPlayer from './Components/VideoPlayer';
 import Options from './Components/Options';
 import Notifications from './Components/Notifications';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { SocketContext } from '../src/SocketContext';
 
 const App = () => {
+  const navigate = useNavigate();
+  const {myVideo,setStream}= useContext(SocketContext);
+
+  useEffect(() => {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then((currentStream) => {
+        setStream(currentStream);
+        if (myVideo.current) {
+          myVideo.current.srcObject = currentStream;
+        }
+      })
+      .catch((err) => {
+        console.error("Media permission denied:", err);
+      });
+  }, [setStream,myVideo]);
+  
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   return (
     <Box
       sx={{
@@ -14,6 +39,7 @@ const App = () => {
         alignItems: 'center',
         width: '100%',
         position: 'relative',
+        minHeight: '100vh',
       }}
     >
       {/* 🔷 Logo on top-left corner */}
@@ -35,6 +61,26 @@ const App = () => {
           }}
         />
       </Box>
+
+      {/* 🔴 Logout Button on top-right */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 10,
+          right: 20,
+          zIndex: 10,
+        }}
+      >
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={handleLogout}
+          sx={{ borderRadius: 2 }}
+        >
+          Logout
+        </Button>
+      </Box>
+
       <Options />
 
       {/* 🎥 Video Player with zoom-in animation */}
@@ -46,8 +92,6 @@ const App = () => {
         <VideoPlayer />
       </motion.div>
 
-      {/* 📞 Options and Notification */}
-      
       <Notifications />
     </Box>
   );

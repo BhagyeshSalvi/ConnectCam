@@ -1,11 +1,11 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
   Button,
-  TextField,
-  Grid,
   Typography,
+  Grid,
   Container,
   Paper,
+  TextField
 } from '@mui/material';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Assignment, Phone, PhoneDisabled } from '@mui/icons-material';
@@ -23,7 +23,7 @@ const StyledContainer = styled(Container)(({ theme }) => ({
 }));
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
-  background: 'rgba(255, 255, 255, 0.05)', // semi-transparent
+  background: 'rgba(255, 255, 255, 0.05)',
   backdropFilter: 'blur(10px)',
   borderRadius: '16px',
   padding: '20px',
@@ -54,30 +54,17 @@ const StyledButton = styled(Button)({
   borderRadius: 10,
 });
 
-const StyledTextField = styled(TextField)({
-  input: {
-    color: 'white',
-  },
-  label: {
-    color: 'rgba(255,255,255,0.7)',
-  },
-  '& .MuiOutlinedInput-root': {
-    '& fieldset': {
-      borderColor: 'rgba(255,255,255,0.3)',
-    },
-    '&:hover fieldset': {
-      borderColor: 'rgba(255,255,255,0.6)',
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: '#00bcd4',
-    },
-  },
-});
-
 const Options = () => {
-  const { me, callAccepted, name, setName, callEnded, endCall, callUser } =
-    useContext(SocketContext);
+  const { me, callAccepted, name, setName, callEnded, endCall, callUser } = useContext(SocketContext);
   const [idToCall, setIdToCall] = useState('');
+
+  // Load user name from localStorage
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser?.name) {
+      setName(storedUser.name);
+    }
+  }, [setName]);
 
   return (
     <StyledContainer>
@@ -89,12 +76,9 @@ const Options = () => {
               <Typography variant="h6" gutterBottom>
                 Account Info
               </Typography>
-              <StyledTextField
-                label="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                fullWidth
-              />
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                Hello, <strong>{name || "User"}</strong>
+              </Typography>
               <CopyToClipboard text={me}>
                 <StyledButton
                   variant="contained"
@@ -112,11 +96,13 @@ const Options = () => {
               <Typography variant="h6" gutterBottom>
                 Make a call
               </Typography>
-              <StyledTextField
+              <TextField
                 label="ID to call"
                 value={idToCall}
                 onChange={(e) => setIdToCall(e.target.value)}
                 fullWidth
+                InputLabelProps={{ style: { color: 'rgba(255,255,255,0.7)' } }}
+                inputProps={{ style: { color: 'white' } }}
               />
               {callAccepted && !callEnded ? (
                 <StyledButton
