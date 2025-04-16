@@ -1,16 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import App from "./app";
 
 const AppRoutes = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
+  // ✅ Auth state is initialized immediately from localStorage
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
     const token = localStorage.getItem("token");
-    setIsAuthenticated(!!token);
-  }, []); // Run once on app load
+    return !!token;
+  });
 
   return (
     <Routes>
@@ -28,9 +27,7 @@ const AppRoutes = () => {
       />
       <Route
         path="/main"
-        element={
-          isAuthenticated ? <App /> : <Navigate to="/login" />
-        }
+        element={isAuthenticated ? <App /> : <Navigate to="/login" />}
       />
     </Routes>
   );
