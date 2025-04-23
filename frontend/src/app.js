@@ -1,18 +1,22 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import { Box, Button } from '@mui/material';
 import VideoPlayer from './Components/VideoPlayer';
 import Options from './Components/Options';
 import Notifications from './Components/Notifications';
 import Controls from './Components/Controls';
+import useAudioCapture from './hooks/useAudioCapture';
 import { motion } from 'framer-motion';
 import { SocketContext } from './SocketContext';
 import { useNavigate } from 'react-router-dom';
 
 const App = () => {
   const navigate = useNavigate();
-  const { myVideo, setStream, stream } = useContext(SocketContext);
+  const { myVideo, setStream, stream, socket } = useContext(SocketContext);
+  const [caption, setCaption] = useState('');
 
-  // ✅ Start media stream on mount, and stop on unmount
+  useAudioCapture(stream);
+
+  // ✅ Start media stream
   useEffect(() => {
     let activeStream;
 
@@ -28,7 +32,6 @@ const App = () => {
         console.error("Media permission denied:", err);
       });
 
-    // ✅ Cleanup: stop all tracks when component unmounts
     return () => {
       if (activeStream) {
         activeStream.getTracks().forEach((track) => track.stop());
@@ -37,18 +40,29 @@ const App = () => {
   }, [myVideo, setStream]);
 
   const handleLogout = () => {
-    // ❌ Clear login data
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-
-    // 🔇 Stop camera/mic stream if running
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
     }
-
-    // 🔁 Navigate to login
     navigate('/login');
   };
+
+  // ✅ Caption handler
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on('caption', (text) => {
+      console.log('💬 Caption received:', text);
+      setCaption(text);
+
+      setTimeout(() => setCaption(''), 5000); // Auto-hide after 5s
+    });
+
+    return () => {
+      socket.off('caption');
+    };
+  }, [socket]);
 
   return (
     <Box
@@ -61,34 +75,14 @@ const App = () => {
         minHeight: '100vh',
       }}
     >
-      {/* 🔷 Logo top-left */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 5,
-          left: 20,
-          zIndex: 10,
-        }}
-      >
-        <img
-          src="/Logo.png"
-          alt="ConnectCam Logo"
-          style={{ width: '200px', objectFit: 'contain' }}
-        />
+      {/* 🔷 Logo */}
+      <Box sx={{ position: 'absolute', top: 5, left: 20, zIndex: 10 }}>
+        <img src="/Logo.png" alt="ConnectCam Logo" style={{ width: '200px', objectFit: 'contain' }} />
       </Box>
 
-      {/* 🔴 Logout Button top-right */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 10,
-          right: 20,
-          zIndex: 10,
-        }}
-      >
-        <Button variant="outlined" color="error" onClick={handleLogout}>
-          Logout
-        </Button>
+      {/* 🔴 Logout */}
+      <Box sx={{ position: 'absolute', top: 10, right: 20, zIndex: 10 }}>
+        <Button variant="outlined" color="error" onClick={handleLogout}>Logout</Button>
       </Box>
 
       <Options />
@@ -102,8 +96,28 @@ const App = () => {
         <VideoPlayer />
       </motion.div>
 
+      {/* 💬 Caption Overlay */}
+      {caption && (
+        <div style={{
+          position: 'absolute',
+          bottom: '80px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(0, 0, 0, 0.75)',
+          color: 'white',
+          padding: '10px 20px',
+          borderRadius: '12px',
+          fontSize: '1.2rem',
+          zIndex: 20,
+          maxWidth: '90%',
+          textAlign: 'center',
+        }}>
+          {caption}
+        </div>
+      )}
+
       <Notifications />
-      <Controls stream={stream}/>
+      <Controls stream={stream} />
     </Box>
   );
 };

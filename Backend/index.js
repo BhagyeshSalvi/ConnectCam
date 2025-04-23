@@ -2,6 +2,9 @@ require("dotenv").config(); // Load .env
 const express = require("express");
 const app = express();
 const server = require("http").createServer(app);
+const axios = require("axios");
+const fs = require("fs-extra");
+const path = require("path");
 const cors = require("cors");
 const authRoutes = require('./routes/auth')
 const connectDB = require("./db");
@@ -74,6 +77,64 @@ io.on("connection", (socket) => {
     socket.on("answerCall", (data) => {
         io.to(data.to).emit("callAccepted", data.signal);
     });
+
+    socket.on("audio-chunk", async (arrayBuffer) => {
+        try {
+          // 1. Save chunk as temporary .webm file
+          const tempFileName = `temp-${Date.now()}.webm`;
+          const tempFilePath = path.join(__dirname, tempFileName);
+          await fs.writeFile(tempFilePath, Buffer.from(arrayBuffer));
+      
+          // 2. Upload file to AssemblyAI
+          const uploadRes = await axios({
+            method: 'post',
+            url: 'https://api.assemblyai.com/v2/upload',
+            headers: { authorization: process.env.ASSEMBLY_API_KEY },
+            data: fs.createReadStream(tempFilePath),
+          });
+      
+          const uploadUrl = uploadRes.data.upload_url;
+      
+          // 3. Request transcription
+          const transcriptRes = await axios.post('https://api.assemblyai.com/v2/transcript', {
+            audio_url: uploadUrl
+          }, {
+            headers: { authorization: process.env.ASSEMBLY_API_KEY }
+          });
+      
+          const transcriptId = transcriptRes.data.id;
+      
+          // 4. Poll for completion
+          let completed = false;
+          let transcriptText = "[transcribing...]";
+          while (!completed) {
+            const pollingRes = await axios.get(`https://api.assemblyai.com/v2/transcript/${transcriptId}`, {
+              headers: { authorization: process.env.ASSEMBLY_API_KEY }
+            });
+      
+            if (pollingRes.data.status === "completed") {
+              transcriptText = pollingRes.data.text;
+              completed = true;
+            } else if (pollingRes.data.status === "error") {
+              transcriptText = "[Error transcribing audio]";
+              completed = true;
+            } else {
+              await new Promise(res => setTimeout(res, 1000)); // wait 1 second before polling again
+            }
+          }
+      
+          // 5. Emit caption back to frontend
+          socket.emit("caption", transcriptText);
+      
+          // 6. Delete temp file
+          await fs.remove(tempFilePath);
+      
+        } catch (err) {
+          console.error("❌ STT error:", err.message);
+          socket.emit("caption", "[STT failed]");
+        }
+      });
+      
 
 });
 

@@ -106,7 +106,7 @@
 
         return (
             //pass the state and methods to the children
-            <SocketContext.Provider value={{ call, callAccepted, callEnded, me, name, setName, stream, myVideo, userVideo, callUser, answerCall, endCall,setStream }}>
+            <SocketContext.Provider value={{ call, callAccepted, callEnded, me, name, setName, stream, myVideo, userVideo, callUser, answerCall, endCall,setStream, socket }}>
                 {children}
             </SocketContext.Provider>
         )
