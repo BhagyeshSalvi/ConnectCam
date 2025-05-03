@@ -8,15 +8,16 @@ import useAudioCapture from './hooks/useAudioCapture';
 import { motion } from 'framer-motion';
 import { SocketContext } from './SocketContext';
 import { useNavigate } from 'react-router-dom';
+import LanguageSelector from './Components/LanguageSelector';
 
 const App = () => {
   const navigate = useNavigate();
   const { myVideo, setStream, stream, socket } = useContext(SocketContext);
   const [caption, setCaption] = useState('');
+  const [sourceLang, setSourceLang] = useState('es'); // Default to Spanish
 
-  useAudioCapture(stream);
+  useAudioCapture(stream, sourceLang); // Pass language to audio capture
 
-  // ✅ Start media stream
   useEffect(() => {
     let activeStream;
 
@@ -48,15 +49,13 @@ const App = () => {
     navigate('/login');
   };
 
-  // ✅ Caption handler
   useEffect(() => {
     if (!socket) return;
 
     socket.on('caption', (text) => {
       console.log('💬 Caption received:', text);
       setCaption(text);
-
-      setTimeout(() => setCaption(''), 5000); // Auto-hide after 5s
+      setTimeout(() => setCaption(''), 5000);
     });
 
     return () => {
@@ -75,19 +74,30 @@ const App = () => {
         minHeight: '100vh',
       }}
     >
-      {/* 🔷 Logo */}
       <Box sx={{ position: 'absolute', top: 5, left: 20, zIndex: 10 }}>
         <img src="/Logo.png" alt="ConnectCam Logo" style={{ width: '200px', objectFit: 'contain' }} />
       </Box>
 
-      {/* 🔴 Logout */}
       <Box sx={{ position: 'absolute', top: 10, right: 20, zIndex: 10 }}>
         <Button variant="outlined" color="error" onClick={handleLogout}>Logout</Button>
       </Box>
 
+      <Box
+  sx={{
+    position: 'absolute',
+    top: 60,
+    right: 20,
+    background: 'rgba(255, 255, 255, 0.05)',
+    padding: '6px 12px',
+    borderRadius: '8px',
+    zIndex: 10,
+    color: 'white',
+  }}
+>
+  <LanguageSelector sourceLang={sourceLang} setSourceLang={setSourceLang} />
+</Box>
       <Options />
 
-      {/* 🎥 Video Player */}
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -96,7 +106,6 @@ const App = () => {
         <VideoPlayer />
       </motion.div>
 
-      {/* 💬 Caption Overlay */}
       {caption && (
         <div style={{
           position: 'absolute',

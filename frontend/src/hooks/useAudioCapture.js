@@ -1,7 +1,7 @@
 import { useEffect, useRef, useContext } from 'react';
 import { SocketContext } from '../SocketContext';
 
-const useAudioCapture = (stream) => {
+const useAudioCapture = (stream, sourceLang = 'es') => {
   const { socket } = useContext(SocketContext);
   const mediaRecorderRef = useRef(null);
   const audioContextRef = useRef(null);
@@ -13,7 +13,6 @@ const useAudioCapture = (stream) => {
   useEffect(() => {
     if (!stream || !stream.getAudioTracks().length) return;
 
-    // Set up AudioContext and AnalyserNode
     const audioContext = new AudioContext();
     const source = audioContext.createMediaStreamSource(stream);
     const analyser = audioContext.createAnalyser();
@@ -37,7 +36,7 @@ const useAudioCapture = (stream) => {
       mediaRecorder.ondataavailable = async (event) => {
         if (event.data && event.data.size > 0) {
           const arrayBuffer = await event.data.arrayBuffer();
-          socket.emit("audio-chunk", arrayBuffer);
+          socket.emit("audio-chunk", { buffer: arrayBuffer, sourceLang });
         }
       };
 
@@ -46,10 +45,7 @@ const useAudioCapture = (stream) => {
     };
 
     const stopRecording = () => {
-      if (
-        mediaRecorderRef.current &&
-        mediaRecorderRef.current.state === 'recording'
-      ) {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
         mediaRecorderRef.current.stop();
         mediaRecorderRef.current = null;
         console.log("🔇 Stopped recording");
@@ -58,10 +54,8 @@ const useAudioCapture = (stream) => {
 
     const detectSpeech = () => {
       analyser.getByteFrequencyData(dataArray);
-      const avg =
-        dataArray.reduce((sum, val) => sum + val, 0) / dataArray.length;
-
-      const speakingThreshold = 15; // You can fine-tune this
+      const avg = dataArray.reduce((sum, val) => sum + val, 0) / dataArray.length;
+      const speakingThreshold = 15;
 
       if (avg > speakingThreshold) {
         if (!speakingRef.current) {
@@ -78,7 +72,7 @@ const useAudioCapture = (stream) => {
               speakingRef.current = false;
               stopRecording();
               silenceTimeoutRef.current = null;
-            }, 1500); // Wait 1.5s after silence to stop
+            }, 1500);
           }
         }
       }
@@ -86,7 +80,7 @@ const useAudioCapture = (stream) => {
       requestAnimationFrame(detectSpeech);
     };
 
-    detectSpeech(); // Start the loop
+    detectSpeech();
 
     return () => {
       stopRecording();
@@ -94,7 +88,7 @@ const useAudioCapture = (stream) => {
       source.disconnect();
       audioContext.close();
     };
-  }, [stream, socket]);
+  }, [stream, socket, sourceLang]);
 };
 
 export default useAudioCapture;
