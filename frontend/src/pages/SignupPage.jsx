@@ -46,7 +46,7 @@ const SignupPage = ({onAuth}) => {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/api/signup", {
+      const res = await axios.post("https://connectcam-backend.onrender.com/api/signup", {
         name,
         email,
         password,
