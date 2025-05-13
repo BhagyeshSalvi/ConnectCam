@@ -11,7 +11,8 @@ const useAudioCapture = (stream, sourceLang = 'es') => {
   const silenceTimeoutRef = useRef(null);
 
   useEffect(() => {
-    if (!stream || !stream.getAudioTracks().length) return;
+    // ✅ Short-circuit the hook if user disabled captions
+    if (sourceLang === 'off' || !stream || !stream.getAudioTracks().length) return;
 
     const audioContext = new AudioContext();
     const source = audioContext.createMediaStreamSource(stream);

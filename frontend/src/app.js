@@ -14,7 +14,7 @@ const App = () => {
   const navigate = useNavigate();
   const { myVideo, setStream, stream, socket } = useContext(SocketContext);
   const [caption, setCaption] = useState('');
-  const [sourceLang, setSourceLang] = useState('es'); // Default to Spanish
+  const [sourceLang, setSourceLang] = useState('off');
 
   useAudioCapture(stream, sourceLang); // Pass language to audio capture
 

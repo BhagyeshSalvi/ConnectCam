@@ -4,7 +4,7 @@ import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 const LanguageSelector = ({ sourceLang, setSourceLang }) => {
   return (
     <FormControl fullWidth size="small" sx={{ mt: 2, minWidth: 180 }}>
-      <InputLabel id="lang-label" sx={{ color: 'white' }}>Spoken Language</InputLabel>
+      <InputLabel id="lang-label" sx={{ color: 'white' }}>Caption/Translation</InputLabel>
       <Select
         labelId="lang-label"
         value={sourceLang}
@@ -26,7 +26,7 @@ const LanguageSelector = ({ sourceLang, setSourceLang }) => {
           },
         }}
       >
-        <MenuItem value="en">English</MenuItem>
+        <MenuItem value="off">OFF- No Captions</MenuItem>
         <MenuItem value="es">Spanish</MenuItem>
         <MenuItem value="fr">French</MenuItem>
         <MenuItem value="de">German</MenuItem>
